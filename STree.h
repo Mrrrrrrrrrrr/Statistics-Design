@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <vector>
+#include <stack>
 #define OK 1
 #define ERROR 0
 #define overflow -1
@@ -14,6 +16,7 @@ typedef struct STNode
     string data;
 }STNode, * STree;
 
-Status InitSTree(STree& ST, const string& data); // ´´½¨Ò»¿ÃÊ÷²¢Éè¶¨Æä¸ù½áµãµÄÊı¾İÖµ
-Status Insertchild(STree& ST, const string& data); // Îª¸ù½áµãSTÌí¼ÓÒ»¸öº¢×Ó
-Status DeleteNode(STree& ST); // É¾³ı´Ë½áµã
+Status InitSTree(STree& ST, const string& data); // åˆ›å»ºä¸€æ£µæ ‘å¹¶è®¾å®šå…¶æ ¹ç»“ç‚¹çš„æ•°æ®å€¼
+Status Insertchild(STree& ST, const string& data); // ä¸ºæ ¹ç»“ç‚¹STæ·»åŠ ä¸€ä¸ªå­©å­
+Status DeleteNode(STree& ST); // åˆ é™¤æ­¤ç»“ç‚¹
+void PushSite(const string& site, STree& ST); // ä¸€ä¸ªåŸŸååœ°å€å­˜å…¥åº“ä¸­
