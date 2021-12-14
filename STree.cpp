@@ -1,5 +1,7 @@
 #include "STree.h"
 
+cout<<"mrrrrrrrrrrr"<<endl;
+
 Status InitSTree(STree& ST, const string& data)
 {
     ST = new STNode();
