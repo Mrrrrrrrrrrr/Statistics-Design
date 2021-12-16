@@ -1,5 +1,17 @@
 #include "STree.h"
 
+// 创建一个函数，使其能够在结点的孩子们中寻找与给定值相同的孩子，返回其指针，若未找到则返回NULL
+STree FindChild(const STree& ST, const string& site)
+{
+    auto q = ST->children;
+    while (q && q->data != site && q->nextsibling)
+        q = q->nextsibling;
+    if (q && q->data == site)
+        return q;
+    else
+        return NULL;
+}
+
 Status InitSTree(STree& ST, const string& data)
 {
     ST = new STNode();
@@ -12,6 +24,8 @@ Status InitSTree(STree& ST, const string& data)
 
 Status Insertchild(STree& ST, const string& data)
 {
+    if (FindChild(ST, data) != NULL)
+        return OK;
     if (!ST->children)
     {
         STree p = new STNode();
@@ -61,18 +75,6 @@ Status DeleteNode(STree& ST)
         free(ST);
         return OK;
     }
-}
-
-// 创建一个函数，使其能够在结点的孩子们中寻找与给定值相同的孩子，返回其指针，若未找到则返回NULL
-STree FindChild(const STree& ST, const string& site)
-{
-    auto q = ST->children;
-    while (q->data != site && q->nextsibling)
-        q = q->nextsibling;
-    if (q->data == site)
-        return q;
-    else
-        return NULL;
 }
 
 void PushSite(const string& site, STree& ST)
