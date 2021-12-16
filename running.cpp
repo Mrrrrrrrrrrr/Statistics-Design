@@ -8,5 +8,8 @@ int main()
 	InitSTree(ST, "ym");
 	PushSite("www.baidu.com", ST);
 	PushSite("www.wangyiyun.com", ST);
-	cout << ST->children->children->nextsibling->data << endl;
+	DeleteSite("www.baidu.com", ST);
+	cout << ST->children->children->data << endl;
+	ChangeSite("www.wangyiyun.com", "www.kb.com", ST);
+	cout << ST->children->children->data << endl;
 }
