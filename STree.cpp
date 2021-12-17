@@ -1,5 +1,7 @@
 #include "STree.h"
 
+vector<STree> AllLeaf;
+
 // 创建一个函数，使其能够在结点的孩子们中寻找与给定值相同的孩子，返回其指针，若未找到则返回NULL
 STree FindChild(const STree& ST, const string& site)
 {
@@ -214,4 +216,24 @@ int ChangeSite(const string& site, const string& change, STree& ST)
         PushSite(change, ST);
         return 1;
     }
+}
+
+void FindLeaf(const STree& ST)
+{
+    AllLeaf.clear();
+    queue<STree> q;
+    q.push(ST);
+    STree p;
+    while (!q.empty())
+    {
+        p = q.front();
+        if (p->children)
+            q.push(p->children);
+        else
+            AllLeaf.push_back(p);
+        if (p->nextsibling)
+            q.push(p->nextsibling);
+        q.pop();
+    }
+    return;
 }
