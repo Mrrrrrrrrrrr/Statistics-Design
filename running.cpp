@@ -7,9 +7,8 @@ int main()
 	STree ST;
 	InitSTree(ST, "ym");
 	PushSite("www.baidu.com", ST);
-	PushSite("www.wangyiyun.com", ST);
-	DeleteSite("www.baidu.com", ST);
-	cout << ST->children->children->data << endl;
-	ChangeSite("www.wangyiyun.com", "www.kb.com", ST);
-	cout << ST->children->children->data << endl;
+	PushSite("www.baidu", ST);
+	PushSite("www.wyy.com", ST);
+	FindLeaf(ST);
+	cout << AllLeaf.size() << endl;
 }
