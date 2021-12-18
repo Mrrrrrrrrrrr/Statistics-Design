@@ -1,6 +1,7 @@
 #include "STree.h"
 
-vector<STree> AllLeaf;
+set<STree> AllLeaf;
+set<STree> AmLeaf;
 string* siting;
 
 // 创建一个函数，使其能够在结点的孩子们中寻找与给定值相同的孩子，返回其指针，若未找到则返回NULL
@@ -90,7 +91,7 @@ int PushSite(const string& site, STree& ST)
     stack<string> s;  // 创建一个用于存储string类型的stack用作临时的存储器
     auto iter1 = site.begin();  // 一号迭代器指示每一段域名的首个字母
     auto iter2 = site.begin();  // 二号迭代器在域名压栈时指示其后的"."
-    string part[4];
+    string part[5];
     int i = 0; // i用以计入段数
     while (!(iter1 == iter2 && iter2 == site.end()))
     {
@@ -125,7 +126,7 @@ int SearchSite(const string& site, STree& ST)
     stack<string> s;  // 创建一个用于存储string类型的stack用作临时的存储器
     auto iter1 = site.begin();  // 一号迭代器指示每一段域名的首个字母
     auto iter2 = site.begin();  // 二号迭代器在域名压栈时指示其后的"."
-    string part[4];
+    string part[5];
     int i = 0; // i用以计入段数
     while (!(iter1 == iter2 && iter2 == site.end()))
     {
@@ -159,7 +160,7 @@ int DeleteSite(const string& site, STree& ST)
     stack<string> s;  // 创建一个用于存储string类型的stack用作临时的存储器
     auto iter1 = site.begin();  // 一号迭代器指示每一段域名的首个字母
     auto iter2 = site.begin();  // 二号迭代器在域名压栈时指示其后的"."
-    string part[4];
+    string part[5];
     int i = 0; // i用以计入段数
     while (!(iter1 == iter2 && iter2 == site.end()))
     {
@@ -218,8 +219,11 @@ int ChangeSite(const string& site, const string& change, STree& ST)
         return 0;
     else
     {
-        if (PushSite(change, ST))
+        if (!PushSite(change, ST))
+        {
+            PushSite(site, ST);
             return 0;
+        }
         return 1;
     }
 }
@@ -236,7 +240,12 @@ void FindLeaf(const STree& ST)
         if (p->children)
             q.push(p->children);
         else
-            AllLeaf.push_back(p);
+        {
+            if (p != ST)
+            {
+                AllLeaf.insert(p);
+            }
+        }
         if (p->nextsibling)
             q.push(p->nextsibling);
         q.pop();
@@ -276,11 +285,11 @@ Status Valid(const string& site)
     stack<string> s;  // 创建一个用于存储string类型的stack用作临时的存储器
     auto iter1 = site.begin();  // 一号迭代器指示每一段域名的首个字母
     auto iter2 = site.begin();  // 二号迭代器在域名压栈时指示其后的"."
-    string part[4];
+    string part[5];
     int i = 0; // i用以计入段数
     while (!(iter1 == iter2 && iter2 == site.end()))
     {
-        if (i >= 4)
+        if (i >= 5)
             return ERROR;
         while (iter2 != site.end() && *iter2 != '.')
             ++iter2;
@@ -298,7 +307,7 @@ Status Valid(const string& site)
         s.push(part[i]);
         ++i;
     }
-    if ((i == 4 && part[0] != "www") || i == 1)
+    if ((i == 5 && part[0] != "www") || i == 1)
         return ERROR;
     ifstream head;
     head.open("head.dat", ios::in);
@@ -310,6 +319,51 @@ Status Valid(const string& site)
     }
     head.close();
     return ERROR;
+}
+
+Status AmbiguousSearch(const string& site, const STree& ST)
+{
+    auto iter1 = site.begin();  // 一号迭代器指示每一段域名的首个字母
+    auto iter2 = site.begin();  // 二号迭代器在域名压栈时指示其后的"."
+    string part[5];
+    int i = 0; // i用以计入段数
+    while (!(iter1 == iter2 && iter2 == site.end()))
+    {
+        if (i >= 5)
+            return ERROR;
+        while (iter2 != site.end() && *iter2 != '.')
+            ++iter2;
+        for (iter1; iter1 != iter2; ++iter1)
+        {
+            part[i] += *iter1;
+        }
+        if (iter2 != site.end())
+        {
+            ++iter1;
+            ++iter2;
+        }
+        if (part[i].size() > 63 || part[i][0] == '-')
+            return ERROR;
+        ++i;
+    }
+    if (i == 1 && part[0] == "www")
+        return ERROR;
+    FindLeaf(ST);
+    AmLeaf.clear();
+    for (auto& p : AllLeaf)
+    {
+        int j = 0;
+        auto r = p->parent;
+        while (r != ST)
+        {
+            if (part[j] == r->data)
+                ++j;
+            r = r->parent;
+        }
+        if (j == i)
+            AmLeaf.insert(p);
+    }
+    return OK;
 }
 
 void Menu()
@@ -335,6 +389,8 @@ void Menu()
     cout << "|.....................................................4.删除域名.......................................................|" << endl;
     cout << "|.....................................................5.查找域名.......................................................|" << endl;
     cout << "|....................................................6.导出域名库......................................................|" << endl;
+    cout << "|....................................................7.域名数查询......................................................|" << endl;
+    cout << "|.....................................................8.模糊查询.......................................................|" << endl;
     cout << "|----------------------------------------------------------------------------------------------------------------------|" << endl;
     int button = 1;
     STree ST;
@@ -360,7 +416,20 @@ void Menu()
                 }
                 if (button == 1)
                 {
-                    ;
+                    inf.open("web.dat", ios::in | ios::out | ios::trunc);
+                    STreeTraverse(ST);
+                    inf << "以下域名自动添加www前缀，具体请以实际应用为准" << endl;
+                    for (int i = 0; i < AllLeaf.size(); ++i)
+                    {
+                        inf << siting[i] << endl;
+                    }
+                    inf.close();
+                    cout << "导出成功！共导出" << AllLeaf.size() << "个域名" << endl;
+                    delete ST;
+                    ST = NULL;
+                    InitSTree(ST, "ym");
+                    cout << "清空完毕！当前库中域名数为：0" << endl;
+                    cout << "|----------------------------------------------------------------------------------------------------------------------|" << endl;
                 }
                 else
                 {
@@ -451,17 +520,75 @@ void Menu()
                 }
             }
             else
-                cout << "当前暂存库中不存在该域名！" << endl;
+            {
+                cout << "当前暂存库中不存在该域名！您是否想要将该域名添加到暂存库中：" << endl;
+                cout << "1.是                                                    2.否" << endl;
+                cin >> button;
+                while (button != 1 && button != 2)
+                {
+                    cout << "输入有误！请重新输入:" << endl;
+                    cin >> button;
+                }
+                if (button == 2)
+                {
+                    cout << "查找结束，当前暂存库中域名数为：" << AllLeaf.size() << endl;
+                }
+                else
+                {
+                    if (PushSite(dat, ST))
+                    {
+                        FindLeaf(ST);
+                        cout << "添加成功！当前暂存库中域名数为：" << AllLeaf.size() << endl;
+                    }
+                    else
+                        cout << "添加失败！域名不合法" << endl;
+                }
+            }
             cout << "|----------------------------------------------------------------------------------------------------------------------|" << endl;
             break;
         case 6:
             inf.open("web.dat", ios::in | ios::out | ios::trunc);
             STreeTraverse(ST);
+            inf << "以下域名自动添加www前缀，具体请以实际应用为准" << endl;
             for (int i = 0; i < AllLeaf.size(); ++i)
             {
                 inf << siting[i] << endl;
             }
+            inf.close();
             cout << "导出成功！共导出" << AllLeaf.size() << "个域名" << endl;
+            cout << "|----------------------------------------------------------------------------------------------------------------------|" << endl;
+            break;
+        case 7:
+            cout << "当前暂存库中域名数为：" << AllLeaf.size() << endl;
+            cout << "|----------------------------------------------------------------------------------------------------------------------|" << endl;
+            break;
+        case 8:
+            cout << "请输入有序的有限段域名：" << endl;
+            cin >> dat;
+            if (!AmbiguousSearch(dat, ST))
+            {
+                cout << "输入域名段不合法！" << endl;
+            }
+            else
+            {
+                if (!AmLeaf.size())
+                {
+                    cout << "未找到符合条件的域名." << endl;
+                }
+                else
+                {
+                    cout << "找到符合条件的域名" << AmLeaf.size() << "个，分别为：" << endl;
+                    for (auto p : AmLeaf)
+                    {
+                        while (p->parent != ST)
+                        {
+                            cout << p->data << ".";
+                            p = p->parent;
+                        }
+                        cout << p->data << endl;
+                    }
+                }
+            }
             cout << "|----------------------------------------------------------------------------------------------------------------------|" << endl;
             break;
         default:
