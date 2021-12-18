@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
 #include <stack>
 #include <queue>
 #include <algorithm>
@@ -18,7 +19,8 @@ typedef struct STNode
     string data = "";
 }STNode, * STree;
 
-extern vector<STree> AllLeaf;
+extern set<STree> AllLeaf;
+extern set<STree> AmLeaf;
 extern string* siting;
 
 Status InitSTree(STree& ST, const string& data); // 创建一棵树并设定其根结点的数据值
@@ -32,3 +34,4 @@ void FindLeaf(const STree& ST); // 寻找库中叶子结点
 Status STreeTraverse(const STree& ST); // 遍历域名库
 Status Valid(const string& site); // 域名合法性检测
 void Menu(); // 互联网域名信息管理系统菜单
+Status AmbiguousSearch(const string& site, const STree& ST); // 对输入的有限段域名进行模糊查找
